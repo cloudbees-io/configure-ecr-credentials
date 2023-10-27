@@ -1,0 +1,31 @@
+apiVersion: automation.cloudbees.io/v1alpha1
+kind: workflow
+
+name: SelfTest
+
+on:
+  push:
+    branches:
+      - "*"
+
+jobs:
+  check:
+    steps:
+      - id: login
+        uses: cloudbees-io/configure-aws-credentials@v0
+        with:
+          aws-region: us-east-1
+          aws-access-key-id: ${{ vars.cloudbees_saas_test_access_key_id }}
+          aws-secret-access-key: ${{ secrets.cloudbees_saas_test_secret_access_key }}
+          role-to-assume: service-ecr-role
+          role-duration-seconds: "3600" # need to override default of 6h as our role has 1h max
+      - name: Compat Check
+        uses: cloudbees-io/configure-ecr-credentials@v0
+      - uses: docker://alpine:3.18
+        # We need something that uses ~/.docker/config.json but doesn't need a docker daemon
+        # ideally we would just use ghcr.io/regclient/regctl:latest but that is a non-root user
+        run: |
+          apk add -U --no-cache curl ca-certificates
+          curl -L https://github.com/regclient/regclient/releases/latest/download/regctl-linux-amd64 >/usr/local/bin/regctl
+          chmod 755 /usr/local/bin/regctl
+          regctl image inspect ${{ steps.login.outputs.aws-account-id }}.dkr.ecr.us-east-1.amazonaws.com/saas-test-container:latest

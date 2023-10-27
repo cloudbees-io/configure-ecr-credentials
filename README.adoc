@@ -1,0 +1,129 @@
+= CloudBees action: Configure Amazon ECR credentials
+
+Use this action to configure Amazon Elastic Container Registry (ECR) credentials for use in CloudBees workflows.
+
+This action logs in a local container configuration file to one or more ECR private registries, or to an ECR public registry.
+
+== Prerequisites
+
+Make sure to add the following to your YAML file:
+
+[source,yaml]
+----
+      - name: Check out repo
+        uses: actions/checkout@v3
+
+      - name: Configure AWS credentials
+        uses: cloudbees-io/configure-aws-credentials@v0
+        with:
+          role-to-assume: arn:aws:iam::123456789012:role/my-github-actions-role
+          aws-region: aws-region-1
+----
+
+Refer to xref:configure-aws-credentials.adoc[] for more information.
+
+== Inputs
+
+[cols="2a,1a,1a,3a",options="header"]
+.Input details
+|===
+
+| Input name
+| Data type
+| Required?
+| Description
+
+| `registries`
+| String
+| No
+| The registry ID.
+
+|===
+
+== Usage examples
+
+=== Log in to ECR, build and push a container image
+
+Log in to an ECR private registry, then build, tag, and push a container image to it.
+
+In your YAML file, add:
+
+[source,yaml]
+----
+      - name: Log in to ECR
+        id: login-ecr
+        uses: cloudbees-io/configure-ecr-credentials@v0
+
+      - name: Build, tag, and push a container image to ECR
+        uses: cloudbees-io/kaniko@v1
+        with:
+          destination: 123456789012.dkr.ecr.us-east-1.amazonaws.com/my-ecr-repo:latest
+----
+
+For more information, refer to xref:deploy-tools:kaniko.adoc[].
+
+
+=== Log in to ECR, package and push a Helm chart
+
+Log in to an ECR private registry, and then package and push a Helm chart to it.
+
+In your YAML file, add:
+
+[source,yaml]
+----
+      - name: Log in to ECR
+        id: login-ecr
+        uses: cloudbees-io/configure-ecr-credentials@v0
+
+      - name: Package and push helm chart to ECR
+        env:
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          REPOSITORY: my-ecr-repo
+        uses: docker://alpine/helm:latest
+        run: |
+          helm package my-ecr-repo
+          helm push my-ecr-repo-0.1.0.tgz oci://123456789012.dkr.ecr.us-east-1.amazonaws.com
+----
+
+NOTE: (for Kaniko users) Helm and Kaniko use the same credential store, so you can use the same credentials for both.
+
+=== Log in to ECR on multiple AWS accounts
+
+Add the AWS credentials configuration action, and then provide cross-account access.
+
+In your YAML file, add:
+
+[source,yaml]
+----
+      - name: Configure AWS credentials
+        uses: cloudbees-io/configure-aws-credentials@v0
+        with:
+          role-to-assume: arn:aws:iam::123456789012:role/my-github-actions-role
+          aws-region: aws-region-1
+
+      - name: Log in to ECR
+        id: login-ecr
+        uses: cloudbees-io/configure-ecr-credentials@v0
+        with:
+          registries: "123456789012,998877665544"
+----
+
+For more information, refer to xref:configure-aws-credentials.adoc[].
+
+
+[NOTE]
+====
+The repository on account `998877665544` must explicitly grant access to the `arn:aws:iam::123456789012:role/my-github-actions-role` role for cross-account access to work.
+
+Refer to link:https://repost.aws/knowledge-center/secondary-account-access-ecr[AWS documentation on allowing secondary account access] for how to correctly configure ECR policies.
+====
+
+== License
+
+This code is made available under the 
+link:https://opensource.org/license/mit/[MIT license].
+
+== References
+
+* Learn more about link:https://docs.cloudbees.com/docs/cloudbees-saas-platform-actions/latest/[using actions in CloudBees workflows].
+* Learn about link:https://docs.cloudbees.com/docs/cloudbees-saas-platform/latest/[the CloudBees platform].

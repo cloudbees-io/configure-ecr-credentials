@@ -1,0 +1,28 @@
+apiVersion: automation.cloudbees.io/v1alpha1
+kind: action
+name: 'Configure ECR Credentials For CloudBees Automations'
+description: 'Configure ECR credentials for use with tools that interact with OCI registries'
+inputs:
+  registries:
+    description: >-
+      A comma-delimited list of AWS account IDs that are associated with the ECR Private registries.
+      If you do not specify a registry, the default ECR Private registry is assumed.
+      If 'public' is given as input to 'registry-type', this input is ignored.
+    required: false
+  registry-type:
+    description: >-
+      Which ECR registry type to log into.
+      Options: [private, public]
+    required: false
+    default: private
+runs:
+  using: composite
+  steps:
+    - name: Configure ECR Credentials For CloudBees Automations
+      uses: docker://registry.saas-dev.beescloud.com/staging/configure-ecr-credentials:v0.0.3
+      env:
+        INPUT_REGISTRIES: ${{ inputs.registries }}
+        INPUT_REGISTRY_TYPE: ${{ inputs.registry-type }}
+      with:
+        entrypoint: configure-ecr-credentials
+        args: "" # SDP-6025
