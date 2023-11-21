@@ -11,7 +11,7 @@ Make sure to add the following to your YAML file:
 [source,yaml]
 ----
       - name: Check out repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v1
 
       - name: Configure AWS credentials
         uses: cloudbees-io/configure-aws-credentials@v1
@@ -19,8 +19,6 @@ Make sure to add the following to your YAML file:
           role-to-assume: arn:aws:iam::123456789012:role/my-cloudbees-actions-role
           aws-region: aws-region-1
 ----
-
-Refer to xref:configure-aws-credentials.adoc[] for more information.
 
 == Inputs
 
@@ -59,9 +57,6 @@ In your YAML file, add:
         with:
           destination: 123456789012.dkr.ecr.us-east-1.amazonaws.com/my-ecr-repo:latest
 ----
-
-For more information, refer to xref:deploy-tools:kaniko.adoc[].
-
 
 === Log in to ECR, package and push a Helm chart
 
@@ -107,9 +102,6 @@ In your YAML file, add:
         with:
           registries: "123456789012,998877665544"
 ----
-
-For more information, refer to xref:configure-aws-credentials.adoc[].
-
 
 [NOTE]
 ====
