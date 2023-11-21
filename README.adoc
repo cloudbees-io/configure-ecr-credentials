@@ -14,9 +14,9 @@ Make sure to add the following to your YAML file:
         uses: actions/checkout@v3
 
       - name: Configure AWS credentials
-        uses: cloudbees-io/configure-aws-credentials@v0
+        uses: cloudbees-io/configure-aws-credentials@v1
         with:
-          role-to-assume: arn:aws:iam::123456789012:role/my-github-actions-role
+          role-to-assume: arn:aws:iam::123456789012:role/my-cloudbees-actions-role
           aws-region: aws-region-1
 ----
 
@@ -52,7 +52,7 @@ In your YAML file, add:
 ----
       - name: Log in to ECR
         id: login-ecr
-        uses: cloudbees-io/configure-ecr-credentials@v0
+        uses: cloudbees-io/configure-ecr-credentials@v1
 
       - name: Build, tag, and push a container image to ECR
         uses: cloudbees-io/kaniko@v1
@@ -73,7 +73,7 @@ In your YAML file, add:
 ----
       - name: Log in to ECR
         id: login-ecr
-        uses: cloudbees-io/configure-ecr-credentials@v0
+        uses: cloudbees-io/configure-ecr-credentials@v1
 
       - name: Package and push helm chart to ECR
         env:
@@ -96,14 +96,14 @@ In your YAML file, add:
 [source,yaml]
 ----
       - name: Configure AWS credentials
-        uses: cloudbees-io/configure-aws-credentials@v0
+        uses: cloudbees-io/configure-aws-credentials@v1
         with:
-          role-to-assume: arn:aws:iam::123456789012:role/my-github-actions-role
+          role-to-assume: arn:aws:iam::123456789012:role/my-cloudbees-actions-role
           aws-region: aws-region-1
 
       - name: Log in to ECR
         id: login-ecr
-        uses: cloudbees-io/configure-ecr-credentials@v0
+        uses: cloudbees-io/configure-ecr-credentials@v1
         with:
           registries: "123456789012,998877665544"
 ----
@@ -113,7 +113,7 @@ For more information, refer to xref:configure-aws-credentials.adoc[].
 
 [NOTE]
 ====
-The repository on account `998877665544` must explicitly grant access to the `arn:aws:iam::123456789012:role/my-github-actions-role` role for cross-account access to work.
+The repository on account `998877665544` must explicitly grant access to the `arn:aws:iam::123456789012:role/my-cloudbees-actions-role` role for cross-account access to work.
 
 Refer to link:https://repost.aws/knowledge-center/secondary-account-access-ecr[AWS documentation on allowing secondary account access] for how to correctly configure ECR policies.
 ====
