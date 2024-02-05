@@ -94,7 +94,7 @@ In your YAML file, add:
         uses: cloudbees-io/configure-aws-credentials@v1
         with:
           role-to-assume: arn:aws:iam::123456789012:role/my-cloudbees-actions-role
-          aws-region: aws-region-1
+          aws-region: eu-west-2
 
       - name: Log in to ECR
         id: login-ecr
