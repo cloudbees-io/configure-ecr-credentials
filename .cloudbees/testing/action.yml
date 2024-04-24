@@ -19,7 +19,7 @@ runs:
   using: composite
   steps:
     - name: Configure ECR Credentials For CloudBees Automations
-      uses: docker://public.ecr.aws/l7o7z1g8/actions/configure-ecr-credentials:${{ action.scm.sha }}
+      uses: docker://020229604682.dkr.ecr.us-east-1.amazonaws.com/actions/configure-ecr-credentials:${{ action.scm.sha }}
       env:
         INPUT_REGISTRIES: ${{ inputs.registries }}
         INPUT_REGISTRY_TYPE: ${{ inputs.registry-type }}
