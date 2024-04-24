@@ -7,20 +7,64 @@ on:
   push:
     branches:
       - "*"
+permissions:
+  scm-token-own: read
+  scm-token-org: read
+  id-token: write
 
 jobs:
+  build:
+      steps:
+        - name: Checkout
+          uses: cloudbees-io/checkout@v1
+
+        - name: Validate action
+          uses: docker://amazon/aws-cli:2.12.6
+          run: |
+            TESTING_SHA=$(cat .cloudbees/testing/action.yml | sha1sum)
+            ORIGINAL_SHA=$(sed -e 's|docker://public.ecr.aws/l7o7z1g8/actions/|docker://020229604682.dkr.ecr.us-east-1.amazonaws.com/actions/|g' < action.yml | sha1sum)
+            if [ "${TESTING_SHA}" != "${ORIGINAL_SHA}" ]; then
+              echo "Original action different from testing action"
+              exit 1
+            fi
+
+        - name: Login to AWS
+          uses: cloudbees-io/configure-aws-credentials@v1
+          id: aws-login
+          with:
+            aws-region: us-east-1
+            role-to-assume: ${{ vars.oidc_staging_iam_role }}
+            role-duration-seconds: "3600" # optionally set the duration of the login token
+
+        - name: Configure container registry for Staging ECR
+          uses: https://github.com/cloudbees-io/configure-ecr-credentials@v1
+
+        - name: Login to Dockerhub using Cloudbees service account
+          uses: https://github.com/cloudbees-io/configure-oci-credentials@v1
+          with:
+            registry: docker.io
+            username: ${{ secrets.e5bbc3_dockerhub_user }}
+            password: ${{ secrets.e5bbc3_dockerhub_password }}
+      
+        - name: Build and publish
+          uses: cloudbees-io/kaniko
+          with:
+            destination: 020229604682.dkr.ecr.us-east-1.amazonaws.com/actions/configure-ecr-credentials:${{ cloudbees.scm.sha }}
+            labels: maintainer=sdp-pod-3,email=engineering@cloudbees.io
+
   check:
+    needs: ["build"]
     steps:
-      - id: login
-        uses: cloudbees-io/configure-aws-credentials@v0
+      - name: Login to AWS
+        uses: cloudbees-io/configure-aws-credentials@v1
+        id: aws-login
         with:
           aws-region: us-east-1
-          aws-access-key-id: ${{ vars.cloudbees_saas_test_access_key_id }}
-          aws-secret-access-key: ${{ secrets.cloudbees_saas_test_secret_access_key }}
-          role-to-assume: service-ecr-role
-          role-duration-seconds: "3600" # need to override default of 6h as our role has 1h max
-      - name: Compat Check
-        uses: cloudbees-io/configure-ecr-credentials@v0
+          role-to-assume: ${{ vars.oidc_staging_iam_role }}
+          role-duration-seconds: "3600" # optionally set the duration of the login token
+
+      - name: Configure ECR for testing
+        uses:  ./.cloudbees/testing
       - uses: docker://alpine:3.18
         # We need something that uses ~/.docker/config.json but doesn't need a docker daemon
         # ideally we would just use ghcr.io/regclient/regctl:latest but that is a non-root user
@@ -28,4 +72,4 @@ jobs:
           apk add -U --no-cache curl ca-certificates
           curl -L https://github.com/regclient/regclient/releases/latest/download/regctl-linux-amd64 >/usr/local/bin/regctl
           chmod 755 /usr/local/bin/regctl
-          regctl image inspect ${{ steps.login.outputs.aws-account-id }}.dkr.ecr.us-east-1.amazonaws.com/saas-test-container:latest
+          regctl image inspect 020229604682.dkr.ecr.us-east-1.amazonaws.com/actions/configure-ecr-credentials:${{ cloudbees.scm.sha }}
