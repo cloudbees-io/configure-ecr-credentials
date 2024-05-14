@@ -49,7 +49,7 @@ jobs:
         - name: Build and publish
           uses: cloudbees-io/kaniko
           with:
-            destination: 020229604682.dkr.ecr.us-east-1.amazonaws.com/actions/configure-ecr-credentials:${{ cloudbees.scm.sha }}
+            destination: 020229604682.dkr.ecr.us-east-1.amazonaws.com/actions/configure-ecr-credentials:${{ cloudbees.scm.sha }},020229604682.dkr.ecr.us-east-1.amazonaws.com/actions/configure-ecr-credentials:latest
             labels: maintainer=sdp-pod-3,email=engineering@cloudbees.io
 
   check:
