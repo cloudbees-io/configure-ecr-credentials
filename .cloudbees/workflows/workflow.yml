@@ -47,9 +47,9 @@ jobs:
             password: ${{ secrets.e5bbc3_dockerhub_password }}
       
         - name: Build and publish
-          uses: cloudbees-io/kaniko
+          uses: cloudbees-io/kaniko@v1
           with:
-            destination: 020229604682.dkr.ecr.us-east-1.amazonaws.com/actions/configure-ecr-credentials:${{ cloudbees.scm.sha }}
+            destination: 020229604682.dkr.ecr.us-east-1.amazonaws.com/actions/configure-ecr-credentials:${{ cloudbees.scm.sha }},020229604682.dkr.ecr.us-east-1.amazonaws.com/actions/configure-ecr-credentials:latest
             labels: maintainer=sdp-pod-3,email=engineering@cloudbees.io
 
   check:
