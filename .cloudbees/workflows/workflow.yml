@@ -19,7 +19,7 @@ jobs:
           uses: cloudbees-io/checkout@v1
 
         - name: Validate action
-          uses: docker://amazon/aws-cli:2.12.6
+          uses: docker://amazon/aws-cli:2.15.53
           run: |
             TESTING_SHA=$(cat .cloudbees/testing/action.yml | sha1sum)
             ORIGINAL_SHA=$(sed -e 's|docker://public.ecr.aws/l7o7z1g8/actions/|docker://020229604682.dkr.ecr.us-east-1.amazonaws.com/actions/|g' < action.yml | sha1sum)
@@ -65,7 +65,7 @@ jobs:
 
       - name: Configure ECR for testing
         uses:  ./.cloudbees/testing
-      - uses: docker://alpine:3.18
+      - uses: docker://alpine:3.19.1
         # We need something that uses ~/.docker/config.json but doesn't need a docker daemon
         # ideally we would just use ghcr.io/regclient/regctl:latest but that is a non-root user
         run: |
