@@ -66,3 +66,28 @@ jobs:
           curl -L https://github.com/regclient/regclient/releases/latest/download/regctl-linux-amd64 >/usr/local/bin/regctl
           chmod 755 /usr/local/bin/regctl
           regctl image inspect 020229604682.dkr.ecr.us-east-1.amazonaws.com/actions/configure-ecr-credentials:${{ cloudbees.scm.sha }}
+
+  check-multi-region:
+    needs: ["build"]
+    steps:
+      - name: Login to AWS
+        uses: cloudbees-io/configure-aws-credentials@v1
+        id: aws-login
+        with:
+          aws-region: us-west-2
+          role-to-assume: ${{ vars.oidc_staging_iam_role }}
+          role-duration-seconds: "3600" # optionally set the duration of the login token
+
+      - name: Configure ECR for testing
+        uses:  ./.cloudbees/testing
+        with:
+          regions: us-east-1,us-west-2
+
+      - uses: docker://alpine:3.19.1
+        # We need something that uses ~/.docker/config.json but doesn't need a docker daemon
+        # ideally we would just use ghcr.io/regclient/regctl:latest but that is a non-root user
+        run: |
+          apk add -U --no-cache curl ca-certificates
+          curl -L https://github.com/regclient/regclient/releases/latest/download/regctl-linux-amd64 >/usr/local/bin/regctl
+          chmod 755 /usr/local/bin/regctl
+          regctl image inspect 020229604682.dkr.ecr.us-east-1.amazonaws.com/actions/configure-ecr-credentials:${{ cloudbees.scm.sha }}

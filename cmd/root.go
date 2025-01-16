@@ -32,6 +32,7 @@ func init() {
 
 	inputString("registries", "", "A comma-delimited list of AWS account IDs that are associated with the ECR Private registries")
 	inputString("registry-type", "", "Which ECR registry type to log into")
+	inputString("regions", "", "Which AWS regions to use when inferring private registries")
 }
 
 func inputString(name string, value string, usage string) {

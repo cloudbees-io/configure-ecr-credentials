@@ -21,6 +21,8 @@ type Config struct {
 	Registries string
 	// RegistryType Which ECR registry type to log into
 	RegistryType string `mapstructure:"registry-type"`
+	// Region If non-empty, overrides the default AWS regions when inferring ECR Private registries
+	Regions string
 }
 
 const (
@@ -48,6 +50,7 @@ func (c Config) Authenticate(ctx context.Context) error {
 		if err != nil {
 			return err
 		}
+
 		client := sts.NewFromConfig(cfg)
 
 		req := &sts.GetCallerIdentityInput{}
@@ -56,9 +59,20 @@ func (c Config) Authenticate(ctx context.Context) error {
 			return err
 		}
 
-		registries = []string{
-			fmt.Sprintf("%s.dkr.ecr.%s.amazonaws.com", *rsp.Account, cfg.Region),
+		regions := c.Regions
+		if len(regions) == 0 {
+			regions = cfg.Region
 		}
+
+		for _, r := range strings.Split(regions, ",") {
+			r = strings.TrimSpace(r)
+			if r == "" {
+				continue
+			}
+
+			registries = append(registries, fmt.Sprintf("%s.dkr.ecr.%s.amazonaws.com", *rsp.Account, r))
+		}
+
 	}
 
 	helperPath, err := exec.LookPath(HELPER_BINARY)

@@ -15,6 +15,10 @@ inputs:
       Options: [private, public]
     required: false
     default: private
+  regions:
+    description: >-
+      When the registries have not been specified, a comma-delimited list fo the regions to configure the default ECR 
+      Private registry for. If empty the only the current region will be configured.
 runs:
   using: composite
   steps:
@@ -23,6 +27,7 @@ runs:
       env:
         INPUT_REGISTRIES: ${{ inputs.registries }}
         INPUT_REGISTRY_TYPE: ${{ inputs.registry-type }}
+        INPUT_REGIONS: ${{ inputs.regions }}
       with:
         entrypoint: configure-ecr-credentials
         args: "" # SDP-6025

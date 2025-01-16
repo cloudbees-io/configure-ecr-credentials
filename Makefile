@@ -21,18 +21,31 @@ MODULE_NAME := $(lastword $(subst /, ,$(shell go list -m)))
 ##@ Build
 
 .PHONY: build
-build: ## Build the container image
-	@echo "⚡️ Building container image..."
+build: sync ## Build the container image
+	@echo "$(ANSI_BOLD)⚡️ Building container image...$(ANSI_RESET)"
 	@$(CONTAINERTOOL) build --rm -t $(MODULE_NAME):v$(MAJOR) -f Dockerfile .
-	@echo "✅ Container image built"
+	@echo "$(ANSI_BOLD)✅ Container image built$(ANSI_RESET)"
 
 
 .PHONY: sync
-sync: VERSION ## Updates action.yml so that the container tag matches the VERSION file
-	@cp -f action.yml action.yml.bak
-	@sed -e "s|^\( *uses: docker://.*\):.*$$|\1:v$(shell cat VERSION)|" action.yml.bak > action.yml
-	@rm  action.yml.bak
-	@echo "✅ action.yml updated to use container tag v$(shell cat VERSION)"
+sync: .cloudbees/testing/action.yml .cloudbees/workflows/workflow.yml Dockerfile ## Updates action.yml so that the container tag matches the VERSION file
+	@echo "$(ANSI_BOLD)✅ All files synchronized$(ANSI_RESET)"
+
+.cloudbees/testing/action.yml: action.yml Makefile ## Ensures that the test version of the action.yml is in sync with the production version
+	@echo "$(ANSI_BOLD)⚡️ Updating $@ ...$(ANSI_RESET)"
+	@sed -e 's|docker://public.ecr.aws/l7o7z1g8/actions/|docker://020229604682.dkr.ecr.us-east-1.amazonaws.com/actions/|g' < action.yml > .cloudbees/testing/action.yml
+
+.cloudbees/workflows/workflow.yml: Dockerfile Makefile ## Ensures that the workflow uses the same version of go as the Dockerfile
+	@echo "$(ANSI_BOLD)⚡️ Updating $@ ...$(ANSI_RESET)"
+	@IMAGE=$$(sed -ne 's/FROM[ \t]*golang:\([^ \t]*\)-alpine[0-9.]*[ \t].*/\1/p' Dockerfile | head -n 1) ; \
+		sed -e 's|\(uses:[ \t]*docker://golang:\)[^ \t]*|\1'"$$IMAGE"'|;' < $@ > $@.bak ; \
+		mv -f $@.bak $@
+
+Dockerfile: go.mod Makefile ## Ensures that the Dockerfile uses the same version of go as the go.mod
+	@echo "$(ANSI_BOLD)⚡️ Updating $@ ...$(ANSI_RESET)"
+	@VERSION=$$(sed -ne 's/^go \([0-9.]*\)$$/\1/p' go.mod) ; \
+		sed -e "s|FROM[ \t]*golang:[^ \t]*-|FROM golang:$${VERSION}-|" < $@ > $@.bak ; \
+		mv -f $@.bak $@
 
 ##@ Release
 
