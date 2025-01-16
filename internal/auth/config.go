@@ -59,20 +59,20 @@ func (c Config) Authenticate(ctx context.Context) error {
 			return err
 		}
 
-		if c.Regions == "" {
-			registries = []string{
-				fmt.Sprintf("%s.dkr.ecr.%s.amazonaws.com", *rsp.Account, cfg.Region),
-			}
-		} else {
-			for _, r := range strings.Split(c.Regions, ",") {
-				r = strings.TrimSpace(r)
-				if r == "" {
-					continue
-				}
-
-				registries = append(registries, fmt.Sprintf("%s.dkr.ecr.%s.amazonaws.com", *rsp.Account, r))
-			}
+		regions := c.Regions
+		if len(regions) == 0 {
+			regions = cfg.Region
 		}
+
+		for _, r := range strings.Split(regions, ",") {
+			r = strings.TrimSpace(r)
+			if r == "" {
+				continue
+			}
+
+			registries = append(registries, fmt.Sprintf("%s.dkr.ecr.%s.amazonaws.com", *rsp.Account, r))
+		}
+
 	}
 
 	helperPath, err := exec.LookPath(HELPER_BINARY)
