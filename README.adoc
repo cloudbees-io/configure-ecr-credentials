@@ -16,7 +16,7 @@ Make sure to add the following to your YAML file:
       - name: Configure AWS credentials
         uses: cloudbees-io/configure-aws-credentials@v1
         with:
-          role-to-assume: arn:aws:iam::123456789012:role/my-github-actions-role
+          role-to-assume: arn:aws:iam::123456789012:role/my-cloudbees-actions-role
           aws-region: your-aws-region
 ----
 
@@ -89,7 +89,7 @@ Add the AWS credentials configuration action, and then provide cross-account acc
       - name: Configure AWS credentials
         uses: cloudbees-io/configure-aws-credentials@v1
         with:
-          role-to-assume: arn:aws:iam::123456789012:role/my-github-actions-role
+          role-to-assume: arn:aws:iam::123456789012:role/my-cloudbees-actions-role
           aws-region: eu-west-2
 
       - name: Log in to ECR
