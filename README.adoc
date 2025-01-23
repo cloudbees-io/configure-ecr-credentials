@@ -17,7 +17,7 @@ Make sure to add the following to your YAML file:
         uses: cloudbees-io/configure-aws-credentials@v1
         with:
           role-to-assume: arn:aws:iam::123456789012:role/my-cloudbees-actions-role
-          aws-region: aws-region-1
+          aws-region: your-aws-region
 ----
 
 == Inputs
@@ -40,11 +40,11 @@ Make sure to add the following to your YAML file:
 
 == Usage examples
 
+== Usage examples
+
 === Log in to ECR, build and push a container image
 
-Log in to an ECR private registry, then build, tag, and push a container image to it.
-
-In your YAML file, add:
+Log in to an ECR private registry, then build, tag, and push a container image to it, as in the following example:
 
 [source,yaml]
 ----
@@ -60,11 +60,9 @@ In your YAML file, add:
 
 === Log in to ECR, package and push a Helm chart
 
-Log in to an ECR private registry, and then package and push a Helm chart to it.
+Log in to an ECR private registry, and then package and push a Helm chart to it, as in the following example:
 
-In your YAML file, add:
-
-[source,yaml]
+[source,yaml,role="default-expanded"]
 ----
       - name: Log in to ECR
         id: login-ecr
@@ -84,9 +82,7 @@ NOTE: (for Kaniko users) Helm and Kaniko use the same credential store, so you c
 
 === Log in to ECR on multiple AWS accounts
 
-Add the AWS credentials configuration action, and then provide cross-account access.
-
-In your YAML file, add:
+Add the AWS credentials configuration action, and then provide cross-account access, as in the following example:
 
 [source,yaml]
 ----
@@ -94,7 +90,7 @@ In your YAML file, add:
         uses: cloudbees-io/configure-aws-credentials@v1
         with:
           role-to-assume: arn:aws:iam::123456789012:role/my-cloudbees-actions-role
-          aws-region: aws-region-1
+          aws-region: eu-west-2
 
       - name: Log in to ECR
         id: login-ecr
@@ -112,10 +108,8 @@ Refer to link:https://repost.aws/knowledge-center/secondary-account-access-ecr[A
 
 === Log in to ECR in multiple AWS regions
 
-By default only the current AWS region will be configured.
-To configure multiple regions, provide a comma separated list of the regions.
-
-In your YAML file, add:
+By default, only the current AWS region is configured.
+To configure multiple regions, provide a comma-separated list of the regions, as in the following example:
 
 [source,yaml]
 ----
@@ -123,13 +117,12 @@ In your YAML file, add:
         uses: cloudbees-io/configure-aws-credentials@v1
         with:
           role-to-assume: arn:aws:iam::123456789012:role/my-cloudbees-actions-role
-          aws-region: aws-region-1
-
+          aws-region: us-east-1
       - name: Log in to ECR
         id: login-ecr
         uses: cloudbees-io/configure-ecr-credentials@v1
         with:
-          regions: aws-region-1,aws-region-2,aws-region-3
+          regions: eu-west-2,ap-south-2,ap-southeast-2
 ----
 
 
@@ -140,5 +133,5 @@ link:https://opensource.org/license/mit/[MIT license].
 
 == References
 
-* Learn more about link:https://docs.cloudbees.com/docs/cloudbees-saas-platform-actions/latest/[using actions in CloudBees workflows].
-* Learn about link:https://docs.cloudbees.com/docs/cloudbees-saas-platform/latest/[the CloudBees platform].
+* Learn more about https://docs.cloudbees.com/docs/cloudbees-platform/latest/actions[using actions in CloudBees workflows].
+* Learn about link:https://docs.cloudbees.com/docs/cloudbees-platform/latest/[the CloudBees platform].
