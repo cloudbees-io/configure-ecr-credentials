@@ -78,7 +78,7 @@ func (c Config) Authenticate(ctx context.Context) error {
 	helperPath, err := exec.LookPath(HELPER_BINARY)
 
 	if err != nil {
-		_, _ = fmt.Fprintln(os.Stderr, "WARNING: Cannot find helper binary %s on the path. Authentication will only work in containers that have this binary on the PATH", HELPER_BINARY)
+		_, _ = fmt.Fprintf(os.Stderr, "WARNING: Cannot find helper binary %s on the path. Authentication will only work in containers that have this binary on the PATH\n", HELPER_BINARY)
 		helperPath = HELPER_BINARY
 	} else {
 		newUUID, _ := uuid.NewUUID()

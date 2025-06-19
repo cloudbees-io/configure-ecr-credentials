@@ -19,7 +19,7 @@ jobs:
           uses: cloudbees-io/checkout@v1
 
         - name: Validate action
-          uses: docker://amazon/aws-cli:2.15.53
+          uses: docker://amazon/aws-cli:2.27.38
           run: |
             TESTING_SHA=$(cat .cloudbees/testing/action.yml | sha1sum)
             ORIGINAL_SHA=$(sed -e 's|docker://public.ecr.aws/l7o7z1g8/actions/|docker://020229604682.dkr.ecr.us-east-1.amazonaws.com/actions/|g' < action.yml | sha1sum)
