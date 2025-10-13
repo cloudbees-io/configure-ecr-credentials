@@ -2,14 +2,14 @@ FROM alpine:3.22 AS certs
 
 RUN apk add -U --no-cache ca-certificates
 
-FROM golang:1.24.4-alpine3.22 AS helper
+FROM golang:1.25.0-alpine3.22 AS helper
 
 ENV CGO_ENABLED=0
 ENV GOBIN=/usr/local/bin
 
 RUN go install github.com/awslabs/amazon-ecr-credential-helper/ecr-login/cli/docker-credential-ecr-login@79ad5557681c631ff7f9391a561609a8452f81c1
 
-FROM golang:1.24.4-alpine3.22 AS build
+FROM golang:1.25.0-alpine3.22 AS build
 
 WORKDIR /work
 
