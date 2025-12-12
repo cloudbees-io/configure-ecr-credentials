@@ -37,7 +37,7 @@ jobs:
             role-duration-seconds: "3600" # optionally set the duration of the login token
 
         - name: Configure container registry for Staging ECR
-          uses: https://github.com/cloudbees-io/configure-ecr-credentials@v1.1.5
+          uses: https://github.com/cloudbees-io/configure-ecr-credentials@v1
 
         - name: Build and publish
           uses: cloudbees-io/kaniko@v1
