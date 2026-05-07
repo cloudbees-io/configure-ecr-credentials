@@ -34,7 +34,11 @@ Make sure to add the following to your YAML file:
 | `registries`
 | String
 | No
-| The registry ID.
+| A comma-delimited list of ECR Private registry hostnames (for example,
+`123456789012.dkr.ecr.us-east-1.amazonaws.com`) to configure credentials for.
+Each entry must be a fully-qualified registry hostname including the AWS account ID and region.
+If omitted, the default ECR Private registry for the caller's account is used.
+When set, the `regions` input is ignored (regions are part of each hostname).
 
 |===
 
@@ -82,7 +86,7 @@ NOTE: (for Kaniko users) Helm and Kaniko use the same credential store, so you c
 
 === Log in to ECR on multiple AWS accounts
 
-Add the AWS credentials configuration action, and then provide cross-account access, as in the following example:
+Add the AWS credentials configuration action, and then provide cross-account access by listing each target registry as a fully-qualified hostname, as in the following example:
 
 [source,yaml]
 ----
@@ -96,7 +100,7 @@ Add the AWS credentials configuration action, and then provide cross-account acc
         id: login-ecr
         uses: cloudbees-io/configure-ecr-credentials@v1
         with:
-          registries: "123456789012,998877665544"
+          registries: "123456789012.dkr.ecr.eu-west-2.amazonaws.com,998877665544.dkr.ecr.eu-west-2.amazonaws.com"
 ----
 
 [NOTE]

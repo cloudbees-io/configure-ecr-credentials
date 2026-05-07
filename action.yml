@@ -5,8 +5,12 @@ description: 'Configure ECR credentials for use with tools that interact with OC
 inputs:
   registries:
     description: >-
-      A comma-delimited list of AWS account IDs that are associated with the ECR Private registries.
-      If you do not specify a registry, the default ECR Private registry is assumed.
+      A comma-delimited list of ECR Private registry hostnames (for example,
+      '123456789012.dkr.ecr.us-east-1.amazonaws.com') to configure credentials for.
+      Each entry must be a fully-qualified registry hostname including the AWS account ID and region.
+      If you do not specify a registry, the default ECR Private registry for the caller's account and the
+      region(s) given via 'regions' (or the current region) is assumed.
+      When 'registries' is set, the 'regions' input is ignored (regions are part of each hostname).
       If 'public' is given as input to 'registry-type', this input is ignored.
     required: false
   registry-type:

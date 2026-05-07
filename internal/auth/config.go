@@ -17,7 +17,9 @@ import (
 )
 
 type Config struct {
-	// Registries A comma-delimited list of AWS account IDs that are associated with the ECR Private registries
+	// Registries A comma-delimited list of ECR Private registry hostnames
+	// (e.g. "123456789012.dkr.ecr.us-east-1.amazonaws.com") to configure credentials for.
+	// Each entry must be a fully-qualified registry hostname including the account ID and region.
 	Registries string
 	// RegistryType Which ECR registry type to log into
 	RegistryType string `mapstructure:"registry-type"`
