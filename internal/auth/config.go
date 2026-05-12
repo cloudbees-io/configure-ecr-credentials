@@ -32,6 +32,27 @@ const (
 	HELPER_PREFIX = "docker-credential-"
 )
 
+// cloudbeesBinDir is the directory the ECR credential helper is copied into
+// so it is on PATH in subsequent action steps. Exposed as a variable so tests
+// can redirect it to a writable location.
+var cloudbeesBinDir = "/cloudbees/bin"
+
+// getCallerIdentity resolves the AWS account ID and default region used when
+// the `registries` input is empty. Exposed as a variable so tests can stub
+// out the AWS SDK calls.
+var getCallerIdentity = func(ctx context.Context) (account string, defaultRegion string, err error) {
+	cfg, err := config.LoadDefaultConfig(ctx)
+	if err != nil {
+		return "", "", err
+	}
+	client := sts.NewFromConfig(cfg)
+	rsp, err := client.GetCallerIdentity(ctx, &sts.GetCallerIdentityInput{})
+	if err != nil {
+		return "", "", err
+	}
+	return *rsp.Account, cfg.Region, nil
+}
+
 func (c Config) Authenticate(ctx context.Context) error {
 	registries := strings.Split(c.Registries, ",")
 	if strings.ToLower(c.RegistryType) == "public" {
@@ -48,22 +69,14 @@ func (c Config) Authenticate(ctx context.Context) error {
 	registries = registries[:n]
 
 	if len(registries) == 0 {
-		cfg, err := config.LoadDefaultConfig(ctx)
-		if err != nil {
-			return err
-		}
-
-		client := sts.NewFromConfig(cfg)
-
-		req := &sts.GetCallerIdentityInput{}
-		rsp, err := client.GetCallerIdentity(ctx, req)
+		account, defaultRegion, err := getCallerIdentity(ctx)
 		if err != nil {
 			return err
 		}
 
 		regions := c.Regions
 		if len(regions) == 0 {
-			regions = cfg.Region
+			regions = defaultRegion
 		}
 
 		for _, r := range strings.Split(regions, ",") {
@@ -72,7 +85,7 @@ func (c Config) Authenticate(ctx context.Context) error {
 				continue
 			}
 
-			registries = append(registries, fmt.Sprintf("%s.dkr.ecr.%s.amazonaws.com", *rsp.Account, r))
+			registries = append(registries, fmt.Sprintf("%s.dkr.ecr.%s.amazonaws.com", account, r))
 		}
 
 	}
@@ -84,7 +97,7 @@ func (c Config) Authenticate(ctx context.Context) error {
 		helperPath = HELPER_BINARY
 	} else {
 		newUUID, _ := uuid.NewUUID()
-		targetPath := filepath.Join("/cloudbees", "bin", fmt.Sprintf("%s-%s", HELPER_BINARY, newUUID.String()))
+		targetPath := filepath.Join(cloudbeesBinDir, fmt.Sprintf("%s-%s", HELPER_BINARY, newUUID.String()))
 		if err := copyFileHelper(targetPath, helperPath); err != nil {
 			_, _ = fmt.Fprintf(os.Stderr, "WARNING: Cannot copy helper binary %s to %s. Authentication will only work in containers that have this binary on the PATH: %v\n", HELPER_BINARY, filepath.Dir(targetPath), err)
 		} else {
