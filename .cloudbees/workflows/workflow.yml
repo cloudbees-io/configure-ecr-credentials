@@ -29,32 +29,18 @@ jobs:
               exit 1
             fi
 
-        - name: Login to AWS
-          uses: cloudbees-io/configure-aws-credentials@v1
-          id: aws-login
+        - id: build
+          name: Build, scan and push to ECR
+          uses: calculi-corp/cb-internal-shared-actions/build@v8
           with:
-            aws-region: us-east-1
-            role-to-assume: ${{ vars.oidc_staging_iam_role }}
-            role-duration-seconds: "3600" # optionally set the duration of the login token
-
-        - name: Configure container registry for Staging ECR
-          uses: https://github.com/cloudbees-io/configure-ecr-credentials@v1
-
-        - name: Build and publish
-          id: build
-          uses: cloudbees-io/kaniko@v1
-          with:
-            destination: 020229604682.dkr.ecr.us-east-1.amazonaws.com/actions/configure-ecr-credentials:${{ cloudbees.scm.sha }}${{ cloudbees.scm.branch == 'main' && ',020229604682.dkr.ecr.us-east-1.amazonaws.com/actions/configure-ecr-credentials:latest' || ''}}
-            labels: maintainer=sdp-pod-3,email=engineering@cloudbees.io
-
-        - id: slsa-attestation
-          name: Generate SLSA attestation
-          uses: calculi-corp/slsa-attestation@v1
-          with:
-            image-digest: 020229604682.dkr.ecr.us-east-1.amazonaws.com/actions/configure-ecr-credentials@${{ steps.build.outputs.digest }}
-            aws-role-to-assume: ${{ vars.oidc_staging_iam_role }}
-            aws-region: us-east-1
-            aws-kms-alias: cbp-dev-kms-key-cosign          
+            go-binary-build: "true"
+            go-binary-name: configure-ecr-credentials
+            kaniko-build: "true"
+            run-unit-test: "false"
+            registry-url: 020229604682.dkr.ecr.us-east-1.amazonaws.com
+            registry-image-name: actions/configure-ecr-credentials
+            registry-type: ECR
+            oidc-iam-role: ${{ vars.oidc_staging_iam_role }}
 
 
   check:
