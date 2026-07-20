@@ -2,7 +2,7 @@ FROM alpine:3.24 AS certs
 
 RUN apk add -U --no-cache ca-certificates
 
-FROM golang:1.26.4-alpine3.24 AS helper
+FROM golang:1.26.5-alpine3.24 AS helper
 
 ENV CGO_ENABLED=0
 ENV GOBIN=/usr/local/bin
